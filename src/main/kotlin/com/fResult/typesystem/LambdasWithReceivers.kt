@@ -13,7 +13,7 @@ object LambdasWithReceivers {
   // option 2 (procedure way) - create a function that takes a person
   fun greet(person: Person) = "hi, I'm ${person.name}"
 
-  // option 3 - extension function (Kotlin/Scala
+  // option 3 - extension function (Kotlin/Scala)
   fun Person.greetExt() =
     // ^^^^ RECEIVER type -> give us access to the `this` reference
     "hi, I'm $name"
@@ -150,25 +150,21 @@ object LambdasWithReceivers {
       }
     println(jsonObjectV2)
 
+    val userJson =
+      buildJson {
+        "name" to "fResult" // addString("name", "fResult") -> "name".to("fResult")
+        "age" to 20 // addNumber("age", 20)         -> "age".to(20)
+      } // JsonValue
+    val credentialsJson =
+      buildJson {
+        "type" to "password" // addString("type", "password") -> "type".to("password")
+        "value" to "secret" // addString("value", "secret")  -> "value".to("secret")
+      } // JsonValue
     val jsonObjectV3 =
       buildJson {
-        "user" to
-          buildJson {
-            "name" to "fResult"
-            "age" to 20
-          }
-        "credentials" to
-          buildJson {
-            "type" to "password"
-            "value" to "secret"
-          }
+        "user" to userJson
+        "credentials" to credentialsJson
       }
     println(jsonObjectV3)
   }
-
-  val smallerJson =
-    buildJson {
-      "name" to "fResult"
-      "age" to 20
-    }
 }
