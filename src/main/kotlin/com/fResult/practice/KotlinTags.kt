@@ -19,22 +19,29 @@ object KotlinTags {
   sealed interface HtmlElement
 
   // step 1
-  data class Html(val head: Head, val body: Body) : HtmlElement {
+  data class Html(
+    val head: Head,
+    val body: Body,
+  ) : HtmlElement {
     override fun toString() = "<!doctype>\n<html lang=\"en\">\n$head\n$body\n</html>"
   }
 
-  data class Head(val title: Title) : HtmlElement {
+  data class Head(
+    val title: Title,
+  ) : HtmlElement {
     override fun toString() = "<head>\n$title\n</head>"
   }
 
-  data class Title(val content: String) : HtmlElement {
+  data class Title(
+    val content: String,
+  ) : HtmlElement {
     override fun toString() = "<title>$content</title>"
   }
 
-  data class Body(val children: List<HtmlElement>) : HtmlElement {
-    override fun toString(): String {
-      return children.joinToString("\n", "<body>\n", "\n</body>")
-    }
+  data class Body(
+    val children: List<HtmlElement>,
+  ) : HtmlElement {
+    override fun toString(): String = children.joinToString("\n", "<body>\n", "\n</body>")
   }
 
   data class Div(
@@ -51,7 +58,9 @@ object KotlinTags {
     }
   }
 
-  data class P(val content: String) : HtmlElement {
+  data class P(
+    val content: String,
+  ) : HtmlElement {
     override fun toString() = "<p>$content</p>"
   }
   // TODO: add data types for the rest of the HTML tags
@@ -62,11 +71,11 @@ object KotlinTags {
     private lateinit var body: Body
 
     fun head(init: HeadBuilder.() -> Unit) {
-      head = KotlinTags.head(init)
+      head = HeadBuilder().apply(init).build()
     }
 
     fun body(init: BodyBuilder.() -> Unit) {
-      body = KotlinTags.body(init)
+      body = BodyBuilder().apply(init).build()
     }
 
     fun build() = Html(head, body)
@@ -84,8 +93,16 @@ object KotlinTags {
 
   class BodyBuilder {
     private val children = mutableListOf<HtmlElement>()
-    fun div(id: String? = null, className: String? = null, init: DivBuilder.() -> Unit) {
-      children.add(KotlinTags.div(id, className, init))
+
+    fun div(
+      id: String? = null,
+      className: String? = null,
+      init: DivBuilder.() -> Unit,
+    ) {
+      DivBuilder(id, className)
+        .apply(init)
+        .build()
+        .apply(children::add)
     }
 
     fun p(content: String) {
@@ -95,7 +112,10 @@ object KotlinTags {
     fun build() = Body(children)
   }
 
-  class DivBuilder(val id: String?, val className: String?) {
+  class DivBuilder(
+    val id: String?,
+    val className: String?,
+  ) {
     private val children = mutableListOf<HtmlElement>()
 
     fun p(content: String) {
@@ -114,39 +134,22 @@ object KotlinTags {
     return builder.build()
   }
 
-  fun head(init: HeadBuilder.() -> Unit): Head {
-    val builder = HeadBuilder()
-    builder.init()
-    return builder.build()
-  }
-
-  fun body(init: BodyBuilder.() -> Unit): Body {
-    val builder = BodyBuilder()
-    builder.init()
-    return builder.build()
-  }
-
-  fun div(id: String? = null, className: String? = null, init: DivBuilder.() -> Unit): Div {
-    val builder = DivBuilder(id, className)
-    builder.init()
-    return builder.build()
-  }
-
-  val htmlExample = html {
-    head {
-      title("My Web Page")
-    }
-    body {
-      p("This is my first paragraph!")
-      div(id = "header", className = "main-header") {
-        p("Welcome to my web site!")
+  val htmlExample =
+    html {
+      head {
+        title("My Web Page")
       }
-      div {
-        p("This is the start of my site!")
-        p("This was rendered with KotlinTags")
+      body {
+        p("This is my first paragraph!")
+        div(id = "header", className = "main-header") {
+          p("Welcome to my web site!")
+        }
+        div {
+          p("This is the start of my site!")
+          p("This was rendered with KotlinTags")
+        }
       }
     }
-  }
 
   // step 4
   @JvmStatic
