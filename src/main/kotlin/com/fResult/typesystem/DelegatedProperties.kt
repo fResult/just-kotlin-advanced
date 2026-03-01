@@ -1,5 +1,6 @@
 package com.fResult.typesystem
 
+import kotlin.properties.Delegates.vetoable
 import kotlin.reflect.KProperty
 
 object DelegatedProperties {
@@ -172,12 +173,32 @@ object DelegatedProperties {
     jane.showUserData()
   }
 
+  // vetoable
+  class BankAccount(initialBalance: Double) { // NEVER use double for money
+    var balance: Double by vetoable(initialBalance) {
+      prop, currentValue, newValue ->
+      // must return a boolean
+      // if true -> var will be changed, if not, the change will be DENIED
+      newValue >= 0
+    }
+  }
+
+  fun demoVeto() {
+    val account = BankAccount(100.00)
+    println("Initial balance: ${account.balance}")
+    account.balance = 150.0 // this should succeed
+    println("Updated balance: ${account.balance}") // 150
+    account.balance = -1.0 // this should be veto
+    println("Final balance: ${account.balance}") // 150
+  }
+
   @JvmStatic
   fun main(args: Array<String>) {
     // demoNaiveLogger()
     // demoLogger()
     // demoLoggerV2()
     // demoDelayed()
-    demoLazy()
+    // demoLazy()
+    demoVeto()
   }
 }
