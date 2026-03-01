@@ -128,11 +128,56 @@ object DelegatedProperties {
     println(delayed.stringDelayed)
   }
 
+  /*
+   * Standard Delegated Properties
+   */
+  // 1 - lazy
+  data class UserData(val name: String, val email: String)
+  class User(val id: String) {
+    val users: Map<String, UserData> = mutableMapOf(
+      "John Doe" to UserData("John Doe", "john.d@example.com"),
+      "Jane Marry" to UserData("Jane Marry", "jane.m@example.com"),
+    )
+    val delayedUserData: UserData? by Delayed {
+      print("[DELAYED] - "); fetchUserData(id)
+    }
+    val standardLazyUserData: UserData? by lazy { // lazy evaluation - a property is NOT computed until first use
+      print("[LAZY   ] - "); fetchUserData(id)
+    }
+
+    fun showUserData() {
+      println("User Data (Delayed): $delayedUserData")
+      println("User Data (Lazy): $standardLazyUserData")
+    }
+
+    private fun fetchUserData(id: String): UserData? {
+      // complex or it takes a while
+      println("Fetching user data by id [$id] from remote server")
+      // simulate something long
+      Thread.sleep(3000)
+      return users[id]
+    }
+  }
+
+  fun demoLazy() {
+    val john = User(id = "John Doe")
+    val jane = User(id = "Jane Marry")
+    println("Users created") // at this point, fetchUserData(...) is NOT triggered
+    println("About to show user data...")
+    john.showUserData() // at this point, userData is first accessed, fetchUserData(...) will be triggered
+    jane.showUserData()
+    // user data is fetched and cached
+    println("showing user data once more")
+    john.showUserData() // fetchUserData(...) will NOT be triggered anymore, because userData is cached
+    jane.showUserData()
+  }
+
   @JvmStatic
   fun main(args: Array<String>) {
     // demoNaiveLogger()
     // demoLogger()
     // demoLoggerV2()
-    demoDelayed()
+    // demoDelayed()
+    demoLazy()
   }
 }
