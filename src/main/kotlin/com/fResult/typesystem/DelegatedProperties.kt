@@ -1,6 +1,9 @@
 package com.fResult.typesystem
 
+import java.util.UUID
+import kotlin.properties.Delegates
 import kotlin.properties.Delegates.vetoable
+import kotlin.random.Random
 import kotlin.reflect.KProperty
 
 object DelegatedProperties {
@@ -175,8 +178,7 @@ object DelegatedProperties {
 
   // vetoable
   class BankAccount(initialBalance: Double) { // NEVER use double for money
-    var balance: Double by vetoable(initialBalance) {
-      prop, currentValue, newValue ->
+    var balance: Double by vetoable(initialBalance) { prop, currentValue, newValue ->
       // must return a boolean
       // if true -> var will be changed, if not, the change will be DENIED
       newValue >= 0
@@ -192,6 +194,53 @@ object DelegatedProperties {
     println("Final balance: ${account.balance}") // 150
   }
 
+  // observable - perform side effects on changing of our properties
+  // examples: monitoring the staleness of a dataset
+  enum class State {
+    NONE, NEW, PROCESSED, STALE
+  }
+
+  class MonitoredDataSet(name: String) {
+    var state: State by Delegates.observable(State.NONE) { prop, oldValue, newValue ->
+      // can alert a system if the state change
+      println("[dataset - $name] State changed: $oldValue -> $newValue")
+      if (newValue == State.STALE)
+        println("[dataset - $name] Alert: dataset is now stale, refresh data")
+    }
+    private var data: List<String> = emptyList()
+
+    fun consumeData() {
+      if (state == State.PROCESSED) {
+        state = State.STALE
+        println("State: $state, Data: $data")
+      } else if (data.isNotEmpty()) {
+        state = State.PROCESSED
+        println("State: $state, Data: $data")
+        // we dump the data to some persistent store
+        data = emptyList()
+      }
+    }
+
+    fun fetchData() {
+      val willBeFetched = Random.nextBoolean()
+      println("Data will be fetched?: $willBeFetched")
+      if (willBeFetched) { // data exists upstream
+        data = (1..5).map { UUID.randomUUID().toString() } // get the data
+        state = State.NEW // reset the state
+      }
+    }
+  }
+
+  fun demoObservable() {
+    val dataset = MonitoredDataSet("sensor-data-incremental")
+    dataset.fetchData()
+    dataset.consumeData()
+
+    dataset.fetchData()
+    dataset.consumeData()
+    dataset.consumeData()
+    dataset.consumeData()
+  }
   @JvmStatic
   fun main(args: Array<String>) {
     // demoNaiveLogger()
@@ -199,6 +248,7 @@ object DelegatedProperties {
     // demoLoggerV2()
     // demoDelayed()
     // demoLazy()
-    demoVeto()
+    // demoVeto()
+    demoObservable()
   }
 }
