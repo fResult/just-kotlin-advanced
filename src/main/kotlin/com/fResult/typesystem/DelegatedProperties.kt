@@ -241,6 +241,25 @@ object DelegatedProperties {
     dataset.consumeData()
     dataset.consumeData()
   }
+
+  // map - bridge connection between Kotlin and weakly typed (e.g. JSON)
+  class WeakObject(val attributes: Map<String, Any>) {
+    val name: String? by attributes // this is a delegate property
+    val size: Int? by attributes
+  }
+
+  fun demoMapDelegated() {
+    val myDict = WeakObject(
+      mapOf(
+        "size" to 12345,
+        "name" to "Test Object"
+      )
+    )
+
+    myDict.name?.also { println("Name of DataSet: $it") } // actually uses attributes.get("name") as String, this can crash if "name" key is not contained in the map
+    myDict.size?.also { println("Size of DataSet: $it") } // actually uses attributes.get("size") as Int, this can crash if "size" key is not contained in the map
+  }
+
   @JvmStatic
   fun main(args: Array<String>) {
     // demoNaiveLogger()
@@ -249,6 +268,7 @@ object DelegatedProperties {
     // demoDelayed()
     // demoLazy()
     // demoVeto()
-    demoObservable()
+    // demoObservable()
+    demoMapDelegated()
   }
 }
