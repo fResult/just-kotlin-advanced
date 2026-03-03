@@ -29,8 +29,46 @@ object Contracts {
     }
   }
 
+  // more complex example
+  open class User(open val username: String, open val email: String) {
+    @OptIn(ExperimentalContracts::class)
+    fun isValidAdmin(): Boolean {
+      contract {
+        returns(true) implies (this@User is Admin)
+      }
+      return this is Admin && email.endsWith("@fResultAdmin.com")
+    }
+  }
+
+  class Admin(
+    override val username: String,
+    override val email: String,
+    val permissions: List<String>,
+  ) : User(username, email) {
+    fun purgeData() = println("ALL DATA REMOVED")
+  }
+
+  fun attemptAdminTasks(user: User) {
+    if (user.isValidAdmin()) { // if it's true -> the user is implied an Admin
+      // user is Admin in this scope
+      println("Running admin tasks...")
+      user.purgeData()
+    } else {
+      println("User ${user.username} is not a valid admin")
+    }
+  }
+
+  fun demoAdmin() {
+    val admin = Admin("adminuser", "admin@fResultAdmin.com", listOf("READ", "WRITE"))
+    attemptAdminTasks(admin)
+
+    val simpleUser = User("fakeAdmin", "fake@fResultAdmin.com")
+    attemptAdminTasks(simpleUser)
+  }
+
   @JvmStatic
   fun main(args: Array<String>) {
-    demoNullableString()
+    // demoNullableString()
+    demoAdmin()
   }
 }
