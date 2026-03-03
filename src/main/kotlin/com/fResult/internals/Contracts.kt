@@ -1,6 +1,7 @@
 package com.fResult.internals
 
 import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.random.Random
 
@@ -66,9 +67,50 @@ object Contracts {
     attemptAdminTasks(simpleUser)
   }
 
+  // 2 - callsInPlace - guarantee that a lambda was invoked in a certain way
+  // assume this comes from some external library
+  open class Resource {
+    fun open() {
+      println("Resource opened")
+    }
+
+    fun close() {
+      println("Resource closed")
+    }
+
+    fun use(): String {
+      println("Resource was accessed")
+      return "BELIEVE IN YOURSELF!"
+    }
+  }
+
+  @OptIn(ExperimentalContracts::class)
+  fun <R : Resource, A> R.bracket(block: (R) -> A): A { // "bracket" pattern
+    contract {
+      callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    this.open()
+    try {
+      return block(this)
+    } finally {
+      this.close()
+    }
+  }
+
+  fun demoResource() {
+    val resource = Resource()
+    val result: String
+    resource.bracket {
+      // callsInPlace contract guarantees this code runs just once
+      result = it.use() // allowed because this is a ONE-TIME assignment
+    }
+    println("I got what I wanted: $result")
+  }
+
   @JvmStatic
   fun main(args: Array<String>) {
     // demoNullableString()
-    demoAdmin()
+    // demoAdmin()
+    demoResource()
   }
 }
