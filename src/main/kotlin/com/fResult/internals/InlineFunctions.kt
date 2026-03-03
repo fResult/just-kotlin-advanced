@@ -44,8 +44,38 @@ object InlineFunctions {
     println("\t- ${product.name} is now ${product.price} USD")
   }
 
+  fun demoPerf() {
+    val products = listOf(
+      Product("Laptop Pro", 1000.00),
+      Product("Phone 25 BIG", 500.00),
+      Product("Tablet 17 Thin", 300.00),
+    )
+
+    val startNonInline = System.nanoTime()
+    repeat(1000) {
+      products.applyDiscount(10.0, ::displayDiscountIfApplicable)
+//      products.applyDiscount(10.0) { product ->
+//        println("\t- ${product.name} is now ${product.price} USD")
+//      }
+    }
+    val durationNonInline = System.nanoTime() - startNonInline
+
+    val startInline = System.nanoTime()
+    repeat(1000) {
+      products.applyDiscountFast(10.0, ::displayDiscountIfApplicable)
+//      products.applyDiscountFast(10.0) { product ->
+//        println("\t- ${product.name} is now ${product.price} USD")
+//      }
+    }
+    val durationInline = System.nanoTime() - startInline
+
+    println("Non-Inline Duration: $durationNonInline")
+    println("Inline Duration: $durationInline")
+  }
+
   @JvmStatic
   fun main(args: Array<String>) {
-    demoDiscounts()
+    // demoDiscounts()
+    demoPerf()
   }
 }
