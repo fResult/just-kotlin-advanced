@@ -107,10 +107,62 @@ object Contracts {
     println("I got what I wanted: $result")
   }
 
+  /*
+   * Exercise:
+   */
+  class GuardianService {
+    init {
+      println("Service initialize")
+    }
+
+    fun monitorSystem() {
+      println("I shall watch over you...")
+    }
+  }
+
+  class GuardianResource {
+    @OptIn(ExperimentalContracts::class)
+    private var resource: GuardianService? = null
+
+    // TODO: 1: add a lambda argument for the `getOrCreate` method
+    @OptIn(ExperimentalContracts::class)
+    fun getOrCreate(initializer: () -> GuardianService): GuardianService {
+      // TODO 2: Implement
+      contract {
+        callsInPlace(initializer, InvocationKind.AT_MOST_ONCE)
+      }
+
+      if (resource == null) {
+        resource = initializer()
+      }
+
+      return resource!!
+    }
+  }
+
+  fun demoGuardian() {
+    val guardianResource = GuardianResource()
+
+    val service1 = guardianResource.getOrCreate {
+      println("Creating Guardian Service 1")
+      GuardianService()
+    }
+    // TODO 3: try to call getOrCreate multiple times and validate that you only have one instance
+    // use that instance - call `monitorSystem`
+    service1.monitorSystem()
+    val service2 = guardianResource.getOrCreate {
+      println("Creating Guardian Service 2 (YOU SHOULD NOT SEE THIS)") // this should not be printed
+      GuardianService()
+    }
+    service2.monitorSystem()
+    println("$service1 == $service2: ${service1 == service2}")
+  }
+
   @JvmStatic
   fun main(args: Array<String>) {
     // demoNullableString()
     // demoAdmin()
-    demoResource()
+    // demoResource()
+    demoGuardian()
   }
 }
