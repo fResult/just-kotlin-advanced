@@ -11,7 +11,10 @@ object InlineFunctions {
     }
   }
 
-  inline fun List<Product>.applyDiscountFast(discountPercentage: Double, operation: (Product) -> Unit) {
+  inline fun List<Product>.applyDiscountFast(
+    discountPercentage: Double,
+    operation: (Product) -> Unit,
+  ) {
     for (product in this) {
       product.price *= (1 - discountPercentage / 100)
       operation(product)
@@ -73,9 +76,49 @@ object InlineFunctions {
     println("Inline Duration: $durationInline")
   }
 
+  /*
+   * 2 benefits of inline function
+   * 1. code is rewritten by the compiler with no overhead (function calls, lambda instantiations
+   * 2. potential perf benefits, best if the functions are small and repeat in your code
+   */
+  // sometimes useful NOT to inline some lambda
+  inline fun performOperation(
+    noinline storeOperation: () -> Unit,
+    executeOperation: () -> Unit,
+  ) {
+    // store noinline lambdas regular values
+    GlobalStore.store(storeOperation)
+
+    // execute the other
+    executeOperation()
+  }
+
+  object GlobalStore {
+    private var storedOperation: (() -> Unit)? = null
+
+    fun store(operation: () -> Unit) {
+      storedOperation = operation
+    }
+
+    fun executeStored() {
+      storedOperation?.invoke()
+    }
+  }
+
+  fun demoNoInline() {
+    performOperation(
+      storeOperation = { println("This op should be called later") },
+      executeOperation = { println("This op should be called immediately") },
+    )
+
+    // later
+    GlobalStore.executeStored()
+  }
+
   @JvmStatic
   fun main(args: Array<String>) {
     // demoDiscounts()
-    demoPerf()
+    // demoPerf()
+    demoNoInline()
   }
 }
