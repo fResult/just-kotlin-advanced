@@ -11,6 +11,7 @@ repositories {
 }
 
 dependencies {
+  implementation("org.jetbrains.kotlin:kotlin-reflect:2.2.21")
   testImplementation(kotlin("test"))
 }
 
