@@ -1,6 +1,7 @@
 package com.fResult.internals
 
 import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.jvmName
 
@@ -52,5 +53,22 @@ object ReflectionBasics {
         "Name: ${prop.name}, Type: ${prop.returnType.classifier}, Is Nullable: ${prop.returnType.isMarkedNullable}"
       )
     }
+
+    // refer to a particular properties (at RUNTIME) on an instance
+    val korn = Person("Korn", 22)
+    println("------------- Korn's properties -------------")
+    val kornProperties = classProperties.map { prop ->
+      "${prop.name} -> ${prop.call(korn)}" // korn.$prop
+    }
+    kornProperties.forEach(::println)
+
+    // can mutate properties dynamically
+    println("Before mutation: ${korn.favoriteMovie}")
+    val favMovieProp = classProperties.find { it.name.lowercase().contains("movie") }
+    favMovieProp?.let {
+       if (it is KMutableProperty<*>)
+         it.setter.call(korn, "Shawshank Redemption")
+    }
+    println("After mutation: ${korn.favoriteMovie}")
   }
 }
