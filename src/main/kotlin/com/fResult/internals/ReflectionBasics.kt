@@ -2,6 +2,7 @@ package com.fResult.internals
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
+import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.jvm.jvmName
 
@@ -66,9 +67,25 @@ object ReflectionBasics {
     println("Before mutation: ${korn.favoriteMovie}")
     val favMovieProp = classProperties.find { it.name.lowercase().contains("movie") }
     favMovieProp?.let {
-       if (it is KMutableProperty<*>)
-         it.setter.call(korn, "Shawshank Redemption")
+      if (it is KMutableProperty<*>)
+        it.setter.call(korn, "Shawshank Redemption")
     }
     println("After mutation: ${korn.favoriteMovie}")
+
+    // inspect functions
+    println("------------- Class functions -------------")
+    val functions = personClass.declaredFunctions
+    functions.forEach { fn ->
+      val fnName = fn.name
+      val params = fn.parameters
+      val returnType = fn.returnType
+      println(
+        "Function $fnName: (${
+          params.joinToString(", ") {
+            it.type.toString().split(".").last()
+          }
+        }) -> $returnType"
+      )
+    }
   }
 }
