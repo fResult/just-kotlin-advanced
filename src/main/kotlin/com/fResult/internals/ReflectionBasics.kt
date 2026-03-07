@@ -4,6 +4,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.jvmName
 
 object ReflectionBasics {
@@ -14,6 +15,8 @@ object ReflectionBasics {
 
     fun fillInTaxForm(authority: String) =
       "[$name] Death and taxes... Filing my tax form for $authority"
+
+    constructor(name: String) : this(name, 0) // secondary constructor
   }
 
   /*
@@ -86,6 +89,27 @@ object ReflectionBasics {
           }
         }) -> $returnType"
       )
+    }
+
+    // call a function
+    // contains tax
+    val taxFunc = functions.find { it.name.lowercase().contains("tax") }
+    taxFunc?.call(korn, "THE ROYALTY").also(::println)
+
+    // inspect and invoke constructor
+    println("------------- Class constructors -------------")
+    val primaryConstructor = personClass.primaryConstructor
+    primaryConstructor?.also {
+      // dynamically instantiate instances
+      val newPerson = it.call("Jane", 99)
+      println("New person instantiated: $newPerson")
+
+      // can invoke functions with a map with all the args
+      val params = it.parameters
+      val newPersonV2 = it.callBy(
+        mapOf(params[0] to "John", params[1] to 999)
+      )
+      println("New person instantiated via parameter map: $newPersonV2")
     }
   }
 }
