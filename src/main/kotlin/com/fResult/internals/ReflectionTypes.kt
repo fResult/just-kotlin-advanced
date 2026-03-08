@@ -1,6 +1,7 @@
 package com.fResult.internals
 
 import kotlin.reflect.KType
+import kotlin.reflect.KTypeParameter
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.typeOf
 
@@ -38,6 +39,19 @@ object ReflectionTypes {
     processList(list, typeOf<List<T>>())
   }
 
+  // demonstrate a flawed attempt at getting generic type arguments
+  fun processListV2(list: List<*>) {
+    val typeParams = list::class.typeParameters.map { it.name }
+    println("Type arguments: $typeParams")
+    if (typeParams.contains("String")) {
+      println("Processing list of Strings")
+    } else if (typeParams.contains("Int")) {
+      println("Processing list of Ints")
+    } else {
+      println("Not supported")
+    }
+  }
+
   @JvmStatic
   fun main(args: Array<String>) {
     val myList: List<*> = listOf(1, 2, 3, 4, 5)
@@ -45,5 +59,7 @@ object ReflectionTypes {
     processList(listOf("One", "Two", "Three"))
     processList(myList, typeOf<List<Int>>())
     processList(myList)
+
+    processListV2(listOf("One", "Two", "Three"))
   }
 }
