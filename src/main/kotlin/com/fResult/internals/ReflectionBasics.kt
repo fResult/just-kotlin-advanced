@@ -2,6 +2,8 @@ package com.fResult.internals
 
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
+import kotlin.reflect.full.companionObject
+import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.declaredFunctions
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.primaryConstructor
@@ -17,6 +19,16 @@ object ReflectionBasics {
       "[$name] Death and taxes... Filing my tax form for $authority"
 
     constructor(name: String) : this(name, 0) // secondary constructor
+
+    companion object {
+      val CAN_FLY = false
+      fun fromCsv(csv: String): Person? {
+        val tokens = csv.split(",").map { it.trim() }
+
+        if (tokens.size != 2) return null
+        return Person(tokens[0], tokens[1].toInt())
+      }
+    }
   }
 
   /*
@@ -110,6 +122,25 @@ object ReflectionBasics {
         mapOf(params[0] to "John", params[1] to 999)
       )
       println("New person instantiated via parameter map: $newPersonV2")
+    }
+
+    // inspect and use a companion
+    println("------------- Class companion object -------------")
+    val companionType =
+      personClass.companionObject // can inspect props/methods of the companion object
+    val companionObject = personClass.companionObjectInstance
+    companionType?.declaredMemberProperties?.forEach { prop ->
+      println("Name: ${prop.name}, Type: ${prop.returnType}, Value: ${prop.call(companionObject)}")
+    } ?: println("No companion object")
+    companionType?.declaredFunctions?.forEach { fn ->
+      val params = fn.parameters
+      println(
+        "Function: ${fn.name}: (${
+          params.joinToString(", ") {
+            it.type.toString().split(".").last()
+          }
+        }), Type: ${fn.returnType}"
+      )
     }
   }
 }
