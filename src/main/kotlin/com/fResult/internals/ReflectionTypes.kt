@@ -84,16 +84,14 @@ object ReflectionTypes {
 
 //    processListV2(listOf("One", "Two", "Three"))
 
-    val loader = ConfigLoader()
-    val props = loader.parseFile()
-    println("Parsed file: $props")
-    val config = loader.deserializeObject<MyConfig>(props)
+    val config = ConfigLoader.default().loadAs<MyConfig>()
     println("Deserialized config: $config")
     val timeout = config.timeout // now, it's type-safe
+    println("Configured Timeout is $timeout seconds")
   }
 }
 
-class ConfigLoader(val path: String = "src/main/resources/application.conf") {
+class ConfigLoader private constructor(val path: String = "src/main/resources/application.conf") {
   fun parseFile(): Map<String, String> {
     val file = File(path)
     val configMap = mutableMapOf<String, String>()
@@ -129,5 +127,14 @@ class ConfigLoader(val path: String = "src/main/resources/application.conf") {
     }
 
     return constructor.callBy(args)
+  }
+
+  companion object {
+    fun default() = ConfigLoader()
+    fun at(path: String) = ConfigLoader(path)
+  }
+  inline fun <reified T : Any> loadAs(): T {
+    val props = parseFile()
+    return deserializeObject<T>(props)
   }
 }
