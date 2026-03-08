@@ -34,10 +34,16 @@ object ReflectionTypes {
     }
   }
 
+  inline fun <reified T> processList(list: List<T>) {
+    processList(list, typeOf<List<T>>())
+  }
+
   @JvmStatic
   fun main(args: Array<String>) {
     val myList: List<*> = listOf(1, 2, 3, 4, 5)
     processList(listOf(1, 2, 3), typeOf<List<Int>>())
+    processList(listOf("One", "Two", "Three"))
     processList(myList, typeOf<List<Int>>())
+    processList(myList)
   }
 }
