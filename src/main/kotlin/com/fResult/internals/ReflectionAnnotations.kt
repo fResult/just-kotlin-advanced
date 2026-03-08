@@ -5,6 +5,10 @@ object ReflectionAnnotations {
 
   // meta-annotations
   @Target(AnnotationTarget.CLASS) // can be attached to class/abstract class/interface...
+  @Retention(AnnotationRetention.RUNTIME)
+  // SOURCE - only inspected by source tools, e.g., compiler + plugins
+  // BINARY - copied to the binary
+  // RUNTIME - copied to the binary AND can be inspected via reflection
   annotation class TestAnnotation(val value: String)
 
   @TestAnnotation(value = "Example") // TestAnnotation instance per class declaration
