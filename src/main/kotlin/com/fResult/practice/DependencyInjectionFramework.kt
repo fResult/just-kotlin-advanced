@@ -1,5 +1,9 @@
 package com.fResult.practice
 
+import kotlin.reflect.KClass
+import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.findAnnotation
+
 object DependencyInjectionFramework {
   // part 1 - create 2 annotations
   // @Layer - runtime annotation, can be attached to classes and interfaces ...
@@ -57,5 +61,17 @@ object DependencyInjectionFramework {
   fun main(args: Array<String>) {
     val data = controller.processHttpRequest(p)
     println("Should retrieve data: $data")
+  }
+
+  class DependencyInjectionManager {
+    private val layers = mutableMapOf<KClass<*>, Any>()
+
+    // part 2.1 - add a function which registers a class into the layers map
+    fun <T : Any> register(clazz: KClass<T>): Unit {
+      val layerAnnotation = clazz.findAnnotation<Layer>()
+      layerAnnotation?.also {
+        layers[clazz] = clazz.createInstance()
+      }
+    }
   }
 }
