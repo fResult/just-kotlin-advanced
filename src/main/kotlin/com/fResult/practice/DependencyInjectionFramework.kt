@@ -23,12 +23,31 @@ object DependencyInjectionFramework {
 
   @Layer
   class Service(@Inject val repository: Repository) {
-    fun getData() = repository.getData()
+    fun performAction() = repository.getData() + " - with some business logic"
   }
 
   @Layer
-  class Controller(@Inject val service: Service) {
-    fun getData() = service.getData()
+  class Controller(@Inject val service: Service, @Inject val users: UserManager) {
+    fun processHttpRequest(payload: String, username: String = "invalid@fResult.com") =
+      if (users.isLoggedIn(username)) "Processed request: Response ${service.performAction()}"
+      else "Not logged in, request denied"
+  }
+
+  @Layer
+  class UserManager {
+    private val loggedUser = mutableSetOf<String>()
+
+    fun login(username: String) {
+      loggedUser.add(username)
+      println("[log] Logged in as $username")
+    }
+
+    fun isLoggedIn(username: String) = username in loggedUser
+
+    fun logout(username: String) {
+      loggedUser.remove(username)
+      println("[log] $username just logged out")
+    }
   }
 
   @Inject
@@ -36,7 +55,7 @@ object DependencyInjectionFramework {
 
   @JvmStatic
   fun main(args: Array<String>) {
-    val data = controller.getData()
+    val data = controller.processHttpRequest(p)
     println("Should retrieve data: $data")
   }
 }
