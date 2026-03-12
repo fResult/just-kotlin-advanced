@@ -4,3 +4,4 @@ plugins {
 rootProject.name = "just-kotlin-advanced"
 
 include("builder-lib-annotations")
+include("builder-lib-impl")
