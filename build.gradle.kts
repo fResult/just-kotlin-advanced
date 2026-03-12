@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
   kotlin("jvm") version "2.2.21"
   id("com.diffplug.spotless") version "8.1.0"
@@ -82,4 +84,9 @@ tasks.register("installGitHooks") {
   }
 
   tasks.getByPath("build").dependsOn("installGitHooks")
+}
+
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.compilerOptions {
+  freeCompilerArgs.set(listOf("-Xannotation-default-target=param-property"))
 }
