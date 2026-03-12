@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   kotlin("jvm") version "2.2.21"
+  id("com.google.devtools.ksp") version "2.3.6"
   id("com.diffplug.spotless") version "8.1.0"
 }
 
@@ -12,8 +13,9 @@ repositories {
   mavenCentral()
 }
 
+val kotlinVersion = "2.2.21"
 dependencies {
-  implementation("org.jetbrains.kotlin:kotlin-reflect:2.2.21")
+  implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
   testImplementation(kotlin("test"))
 }
 
