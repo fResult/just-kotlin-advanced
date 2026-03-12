@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:max-line-length")
+
 package com.fResult.internals
 
 import kotlin.contracts.ExperimentalContracts
@@ -15,14 +17,20 @@ object Contracts {
       // small DSL for testing things about this function
       returns(true) implies (str != null)
     }
-    return if (str == "" || str == null) false
-    else str.all { it.isDigit() }
+    return if (str == "" || str == null) {
+      false
+    } else {
+      str.all { it.isDigit() }
+    }
   }
 
   fun demoNullableString() {
     val maybeString =
-      if (Random.nextBoolean()) "123456"
-      else null
+      if (Random.nextBoolean()) {
+        "123456"
+      } else {
+        null
+      }
 
     println("I has maybe string $maybeString")
     if (containsJustDigits(maybeString)) { // containsJustDigits(...) == true AND maybeString != null
@@ -31,7 +39,10 @@ object Contracts {
   }
 
   // more complex example
-  open class User(open val username: String, open val email: String) {
+  open class User(
+    open val username: String,
+    open val email: String,
+  ) {
     @OptIn(ExperimentalContracts::class)
     fun isValidAdmin(): Boolean {
       contract {
@@ -143,17 +154,19 @@ object Contracts {
   fun demoGuardian() {
     val guardianResource = GuardianResource()
 
-    val service1 = guardianResource.getOrCreate {
-      println("Creating Guardian Service 1")
-      GuardianService()
-    }
+    val service1 =
+      guardianResource.getOrCreate {
+        println("Creating Guardian Service 1")
+        GuardianService()
+      }
     // TODO 3: try to call getOrCreate multiple times and validate that you only have one instance
     // use that instance - call `monitorSystem`
     service1.monitorSystem()
-    val service2 = guardianResource.getOrCreate {
-      println("Creating Guardian Service 2 (YOU SHOULD NOT SEE THIS)") // this should not be printed
-      GuardianService()
-    }
+    val service2 =
+      guardianResource.getOrCreate {
+        println("Creating Guardian Service 2 (YOU SHOULD NOT SEE THIS)") // this should not be printed
+        GuardianService()
+      }
     service2.monitorSystem()
     println("$service1 == $service2: ${service1 == service2}")
   }

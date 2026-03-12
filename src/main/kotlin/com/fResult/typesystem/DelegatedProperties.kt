@@ -1,3 +1,8 @@
+@file:Suppress(
+  "ktlint:standard:max-line-length",
+  "ktlint:standard:no-consecutive-comments",
+)
+
 package com.fResult.typesystem
 
 import java.util.UUID
@@ -9,7 +14,9 @@ import kotlin.reflect.KProperty
 object DelegatedProperties {
   // access (get/set) properties and trigger side effect
 
-  class LoggingClassNaive(val id: Int) {
+  class LoggingClassNaive(
+    val id: Int,
+  ) {
     var property: Int = 0
       get() {
         // logging of the change of value
@@ -32,26 +39,38 @@ object DelegatedProperties {
   }
 
   // delegate properties
-  class LoggingProp<A>(val id: String, val default: A) {
+  class LoggingProp<A>(
+    val id: String,
+    val default: A,
+  ) {
     var property: A = default
 
-    operator fun getValue(currentRef: Any, prop: KProperty<*>): A {
+    operator fun getValue(
+      currentRef: Any,
+      prop: KProperty<*>,
+    ): A {
       // logging of the change of value
       println("[logging $id] getting property")
       return property
     }
 
-    operator fun setValue(currentRef: Any, prop: KProperty<*>, value: A) {
+    operator fun setValue(
+      currentRef: Any,
+      prop: KProperty<*>,
+      value: A,
+    ) {
       println("[logging $id] setting property to new value $value")
       property = value
     }
   }
 
-  class LoggingClass(val id: Int) {
+  class LoggingClass(
+    val id: Int,
+  ) {
     var intProperty: Int by LoggingProp("$id-intProperty", 0) // <-- delegated property
     var stringProperty: String by LoggingProp(
       "$id-stringProperty",
-      "Hello"
+      "Hello",
     ) // same behavior, reused!
   }
 
@@ -67,11 +86,15 @@ object DelegatedProperties {
   }
 
   // how delegates work
-  class LoggingClassV2(id: Int) {
+  class LoggingClassV2(
+    id: Int,
+  ) {
     var myProperty: Int by LoggingProp("$id-myProperty", 0)
   }
 
-  class LoggingClassV2Expanded(id: Int) {
+  class LoggingClassV2Expanded(
+    id: Int,
+  ) {
     private var propDelegate = LoggingProp("$id-myProperty", 0)
     var myProperty: Int
       get() = propDelegate.getValue(this, ::propDelegate)
@@ -95,11 +118,16 @@ object DelegatedProperties {
   }
 
   // Exercise: implement a class Delayed
-  class Delayed<A>(private val func: () -> A) {
+  class Delayed<A>(
+    private val func: () -> A,
+  ) {
     // DONE TODO: add a variable "content" which is a nullable A, starting at null
     private var content: A? = null
 
-    operator fun getValue(currentRef: Any, prop: KProperty<*>): A {
+    operator fun getValue(
+      currentRef: Any,
+      prop: KProperty<*>,
+    ): A {
       // DONE TODO: check if the content is null, and if not, invoke the `func` constructor arg
       //       and return the content
       if (content == null) {
@@ -113,12 +141,14 @@ object DelegatedProperties {
   // DONE TODO: use it and find out what it means
   // Lazy Evaluation = variable is not set until first use
   class DelayedClass {
-    val intDelayed: Int by Delayed { // usage as delegated property
+    val intDelayed: Int by Delayed {
+      // usage as delegated property
       println("I'm setting up via Int!")
       42
     }
 
-    val stringDelayed: String by Delayed { // usage as delegated property
+    val stringDelayed: String by Delayed {
+      // usage as delegated property
       println("I'm setting up via String!")
       "Hello, world!"
     }
@@ -136,17 +166,27 @@ object DelegatedProperties {
    * Standard Delegated Properties
    */
   // 1 - lazy
-  data class UserData(val name: String, val email: String)
-  class User(val id: String) {
-    val users: Map<String, UserData> = mutableMapOf(
-      "John Doe" to UserData("John Doe", "john.d@example.com"),
-      "Jane Marry" to UserData("Jane Marry", "jane.m@example.com"),
-    )
+  data class UserData(
+    val name: String,
+    val email: String,
+  )
+
+  class User(
+    val id: String,
+  ) {
+    val users: Map<String, UserData> =
+      mutableMapOf(
+        "John Doe" to UserData("John Doe", "john.d@example.com"),
+        "Jane Marry" to UserData("Jane Marry", "jane.m@example.com"),
+      )
     val delayedUserData: UserData? by Delayed {
-      print("[DELAYED] - "); fetchUserData(id)
+      print("[DELAYED] - ")
+      fetchUserData(id)
     }
-    val standardLazyUserData: UserData? by lazy { // lazy evaluation - a property is NOT computed until first use
-      print("[LAZY   ] - "); fetchUserData(id)
+    val standardLazyUserData: UserData? by lazy {
+      // lazy evaluation - a property is NOT computed until first use
+      print("[LAZY   ] - ")
+      fetchUserData(id)
     }
 
     fun showUserData() {
@@ -177,7 +217,9 @@ object DelegatedProperties {
   }
 
   // vetoable
-  class BankAccount(initialBalance: Double) { // NEVER use double for money
+  class BankAccount(
+    initialBalance: Double,
+  ) { // NEVER use double for money
     var balance: Double by vetoable(initialBalance) { prop, currentValue, newValue ->
       // must return a boolean
       // if true -> var will be changed, if not, the change will be DENIED
@@ -197,15 +239,21 @@ object DelegatedProperties {
   // observable - perform side effects on changing of our properties
   // examples: monitoring the staleness of a dataset
   enum class State {
-    NONE, NEW, PROCESSED, STALE
+    NONE,
+    NEW,
+    PROCESSED,
+    STALE,
   }
 
-  class MonitoredDataSet(name: String) {
+  class MonitoredDataSet(
+    name: String,
+  ) {
     var state: State by Delegates.observable(State.NONE) { prop, oldValue, newValue ->
       // can alert a system if the state change
       println("[dataset - $name] State changed: $oldValue -> $newValue")
-      if (newValue == State.STALE)
+      if (newValue == State.STALE) {
         println("[dataset - $name] Alert: dataset is now stale, refresh data")
+      }
     }
     private var data: List<String> = emptyList()
 
@@ -243,21 +291,28 @@ object DelegatedProperties {
   }
 
   // map - bridge connection between Kotlin and weakly typed (e.g. JSON)
-  class WeakObject(val attributes: Map<String, Any>) {
+  class WeakObject(
+    val attributes: Map<String, Any>,
+  ) {
     val name: String? by attributes // this is a delegate property
     val size: Int? by attributes
   }
 
   fun demoMapDelegated() {
-    val myDict = WeakObject(
-      mapOf(
-        "size" to 12345,
-        "name" to "Test Object"
+    val myDict =
+      WeakObject(
+        mapOf(
+          "size" to 12345,
+          "name" to "Test Object",
+        ),
       )
-    )
 
-    myDict.name?.also { println("Name of DataSet: $it") } // actually uses attributes.get("name") as String, this can crash if "name" key is not contained in the map
-    myDict.size?.also { println("Size of DataSet: $it") } // actually uses attributes.get("size") as Int, this can crash if "size" key is not contained in the map
+    myDict.name?.also {
+      println("Name of DataSet: $it")
+    } // actually uses attributes.get("name") as String, this can crash if "name" key is not contained in the map
+    myDict.size?.also {
+      println("Size of DataSet: $it")
+    } // actually uses attributes.get("size") as Int, this can crash if "size" key is not contained in the map
   }
 
   @JvmStatic

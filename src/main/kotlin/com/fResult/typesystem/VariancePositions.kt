@@ -1,9 +1,14 @@
+@file:Suppress("ktlint:standard:no-consecutive-comments")
+
 package com.fResult.typesystem
 
 object VariancePositions {
   abstract class Animal
+
   class Dog : Animal()
+
   class Cat : Animal()
+
   class Crocodile : Animal()
 
   // out = Covariant, in = Contravariant
@@ -70,8 +75,13 @@ object VariancePositions {
    */
   // 1 - consume elements in a covariant type
   abstract class LList<out A>
+
   data object EmptyList : LList<Nothing>()
-  data class Cons<out A>(val head: A, val tail: LList<A>) : LList<A>()
+
+  data class Cons<out A>(
+    val head: A,
+    val tail: LList<A>,
+  ) : LList<A>()
 
   // how do we add an element?
   // solution = widening type type
@@ -80,7 +90,9 @@ object VariancePositions {
   // 2 - return element in a contravariant type
   // solution = narrow the type
   abstract class Vehicle
+
   open class Car : Vehicle()
+
   class SuperCar : Car()
 
   class RepairShop<in A : Vehicle> {
@@ -112,8 +124,11 @@ object VariancePositions {
   }
 }
 
-class LLList<out A>(private var items: MutableList<A>) {
+class LLList<out A>(
+  private var items: MutableList<A>,
+) {
   fun head(): A = TODO()
+
   fun tail(): LLList<A> = TODO()
 
   companion object {
@@ -147,7 +162,10 @@ class LLList<out A>(private var items: MutableList<A>) {
     return LLList(filteredItems.toMutableList())
   }
 
-  fun <B> reduce(initial: B, reducer: (B, A) -> B): B {
+  fun <B> reduce(
+    initial: B,
+    reducer: (B, A) -> B,
+  ): B {
     var acc = initial
     for (item in items) {
       acc = reducer(acc, item)

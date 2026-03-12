@@ -1,9 +1,10 @@
+@file:Suppress("ktlint:standard:no-consecutive-comments")
+
 package com.fResult.internals
 
 import java.io.File
 import kotlin.reflect.KParameter
 import kotlin.reflect.KType
-import kotlin.reflect.KTypeParameter
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.typeOf
 
@@ -22,7 +23,10 @@ object ReflectionTypes {
   //   is List<*> -> list.forEach(::println)
   // }
 
-  fun processList(list: List<*>, type: KType) {
+  fun processList(
+    list: List<*>,
+    type: KType,
+  ) {
     val listOfStringType = typeOf<List<String>>()
     val listOfIntType = typeOf<List<Int>>()
     if (type.isSubtypeOf(listOfStringType)) {
@@ -91,7 +95,9 @@ object ReflectionTypes {
   }
 }
 
-class ConfigLoader private constructor(val path: String = "src/main/resources/application.conf") {
+class ConfigLoader private constructor(
+  val path: String = "src/main/resources/application.conf",
+) {
   fun parseFile(): Map<String, String> {
     val file = File(path)
     val configMap = mutableMapOf<String, String>()
@@ -105,34 +111,48 @@ class ConfigLoader private constructor(val path: String = "src/main/resources/ap
     return configMap
   }
 
-  fun deserializeValue(value: String, type: KType): Any = when (type.classifier) { // KType.classifier -> KClassifier (supertype of KClass)
-    String::class -> value
-    Int::class -> value.toInt()
-    Double::class -> value.toDouble()
-    Boolean::class -> value.toBoolean()
-    else -> throw IllegalArgumentException("Unsupported type: $type")
-  }
+  fun deserializeValue(
+    value: String,
+    type: KType,
+  ): Any =
+    when (type.classifier) { // KType.classifier -> KClassifier (supertype of KClass)
+      String::class -> value
+      Int::class -> value.toInt()
+      Double::class -> value.toDouble()
+      Boolean::class -> value.toBoolean()
+      else -> throw IllegalArgumentException("Unsupported type: $type")
+    }
 
   inline fun <reified T> deserializeObject(props: Map<String, String>): T {
     // KClass<T> to be able to build an instance of T
     val kClass = T::class
-    val constructor = kClass.constructors.firstOrNull()
-      ?: throw IllegalArgumentException("Type ${kClass.simpleName} doesn't have an accessible primary constructork")
-    val args: Map<KParameter, Any> = constructor.parameters.associateWith { param ->
-      val key = param.name
-        ?: throw IllegalArgumentException("Unname constructor param for ${kClass.simpleName}")
-      val value = props[key]
-        ?: throw IllegalArgumentException("Missing value for the constructor param ${param.name} in class ${kClass.simpleName}")
-      deserializeValue(value, param.type)
-    }
+    val constructor =
+      kClass.constructors.firstOrNull()
+        ?: throw IllegalArgumentException(
+          "Type ${kClass.simpleName} doesn't have an accessible primary constructork",
+        )
+    val args: Map<KParameter, Any> =
+      constructor.parameters.associateWith { param ->
+        val key =
+          param.name
+            ?: throw IllegalArgumentException("Unname constructor param for ${kClass.simpleName}")
+        val value =
+          props[key]
+            ?: throw IllegalArgumentException(
+              "Missing value for the constructor param ${param.name} in class ${kClass.simpleName}",
+            )
+        deserializeValue(value, param.type)
+      }
 
     return constructor.callBy(args)
   }
 
   companion object {
     fun default() = ConfigLoader()
+
     fun at(path: String) = ConfigLoader(path)
   }
+
   inline fun <reified T : Any> loadAs(): T {
     val props = parseFile()
     return deserializeObject<T>(props)

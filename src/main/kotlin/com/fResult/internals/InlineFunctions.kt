@@ -1,10 +1,18 @@
+@file:Suppress("ktlint:standard:no-consecutive-comments")
+
 package com.fResult.internals
 
 object InlineFunctions {
   // ecommerce platform
-  data class Product(val name: String, var price: Double) // never use Double for money
+  data class Product(
+    val name: String,
+    var price: Double,
+  ) // never use Double for money
 
-  fun List<Product>.applyDiscount(discountPercentage: Double, operation: (Product) -> Unit) {
+  fun List<Product>.applyDiscount(
+    discountPercentage: Double,
+    operation: (Product) -> Unit,
+  ) {
     for (product in this) {
       product.price *= (1 - discountPercentage / 100)
       operation(product)
@@ -22,11 +30,12 @@ object InlineFunctions {
   }
 
   fun demoDiscounts() {
-    val products = listOf(
-      Product("Laptop Pro", 1000.00),
-      Product("Phone 25 BIG", 500.00),
-      Product("Tablet 17 Thin", 300.00),
-    )
+    val products =
+      listOf(
+        Product("Laptop Pro", 1000.00),
+        Product("Phone 25 BIG", 500.00),
+        Product("Tablet 17 Thin", 300.00),
+      )
 
     println("Applying a 10% discount:")
     products.applyDiscount(10.0, ::displayDiscountIfApplicable)
@@ -48,11 +57,12 @@ object InlineFunctions {
   }
 
   fun demoPerf() {
-    val products = listOf(
-      Product("Laptop Pro", 1000.00),
-      Product("Phone 25 BIG", 500.00),
-      Product("Tablet 17 Thin", 300.00),
-    )
+    val products =
+      listOf(
+        Product("Laptop Pro", 1000.00),
+        Product("Phone 25 BIG", 500.00),
+        Product("Tablet 17 Thin", 300.00),
+      )
 
     val startNonInline = System.nanoTime()
     repeat(1000) {
