@@ -8,6 +8,7 @@ typealias Table<A> = Map<String, A>
 
 // example
 class Either<out E, out A>
+
 // variant modifiers carry over to the type aliases
 typealias ErrorOr<A> = Either<Throwable, A>
 

@@ -29,16 +29,27 @@ object DependencyInjectionFramework {
   }
 
   @Injectable
-  class Service(@Inject val repository: Repository) {
+  class Service(
+    @Inject val repository: Repository,
+  ) {
     fun performAction() = repository.getData() + " - with some business logic"
   }
 
   @Injectable
-  class Controller(@Inject val service: Service, @Inject val users: UserManager) {
-    fun processHttpRequest(payload: String, username: String = "invalid@fResult.com"): String {
+  class Controller(
+    @Inject val service: Service,
+    @Inject val users: UserManager,
+  ) {
+    fun processHttpRequest(
+      payload: String,
+      username: String = "invalid@fResult.com",
+    ): String {
       println("Process http request for $payload")
-      return if (users.isLoggedIn(username)) "Processed request: Response ${service.performAction()}"
-      else "Not logged in, request denied"
+      return if (users.isLoggedIn(username)) {
+        "Processed request: Response ${service.performAction()}"
+      } else {
+        "Not logged in, request denied"
+      }
     }
   }
 
@@ -51,9 +62,7 @@ object DependencyInjectionFramework {
       println("[log] Logged in as $username")
     }
 
-    fun isLoggedIn(username: String): Boolean {
-      return username in loggedUsers
-    }
+    fun isLoggedIn(username: String): Boolean = username in loggedUsers
 
     fun logout(username: String) {
       loggedUsers.remove(username)
@@ -87,7 +96,8 @@ object DependencyInjectionFramework {
     private val layers = mutableMapOf<KClass<*>, Any>()
 
     fun initialize() =
-      DependencyInjectionFramework::class.nestedClasses
+      DependencyInjectionFramework::class
+        .nestedClasses
         .forEach { register(it) }
 
     private fun <T : Any> register(clazz: KClass<T>) {
@@ -100,24 +110,23 @@ object DependencyInjectionFramework {
       }
     }
 
-
     @Suppress("UNCHECKED_CAST")
-    fun <T : Any> getInstance(clazz: KClass<T>): T {
-      return layers[clazz] as? T
+    fun <T : Any> getInstance(clazz: KClass<T>): T =
+      layers[clazz] as? T
         ?: throw IllegalArgumentException("Class ${clazz.simpleName} not registered")
-    }
 
     private fun <T : Any> createInstance(clazz: KClass<T>): T {
       val constructor = clazz.primaryConstructor ?: return clazz.createInstance()
 
-      val args = constructor.parameters.map { param ->
-        val type = param.type.classifier as KClass<*>
-        // Check if we already have an instance of this type
-        return@map layers[type] ?: createInstance(type).also {
-          // Cache it if created recursively
-          layers[type] = it
+      val args =
+        constructor.parameters.map { param ->
+          val type = param.type.classifier as KClass<*>
+          // Check if we already have an instance of this type
+          return@map layers[type] ?: createInstance(type).also {
+            // Cache it if created recursively
+            layers[type] = it
+          }
         }
-      }
 
       return constructor.call(*args.toTypedArray())
     }
@@ -135,9 +144,9 @@ object DependencyInjectionFramework {
 //      }
 
 //      val constructor = clazz.primaryConstructor
-////      clazz.members.forEach { member ->
-////        val injectAnnotation = member.findAnnotation<Inject>()
-////      }
+// //      clazz.members.forEach { member ->
+// //        val injectAnnotation = member.findAnnotation<Inject>()
+// //      }
 //      val injectedProperties = constructor?.parameters
 //        ?.filter { prop -> prop.findAnnotation<Inject>() != null }
 //        ?: emptyList()

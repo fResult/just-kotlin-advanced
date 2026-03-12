@@ -13,7 +13,9 @@ object ReflectionAnnotations {
   // SOURCE - only inspected by source tools, e.g., compiler + plugins
   // BINARY - copied to the binary
   // RUNTIME - copied to the binary AND can be inspected via reflection
-  annotation class TestAnnotation(val value: String)
+  annotation class TestAnnotation(
+    val value: String,
+  )
 
   @TestAnnotation(value = "Example") // TestAnnotation instance per class declaration
   class AnnotatedClass {
@@ -35,29 +37,38 @@ object ReflectionAnnotations {
   // sits in the library
   @Target(AnnotationTarget.CLASS)
   @Retention(AnnotationRetention.RUNTIME)
-  annotation class Table(val name: String)
+  annotation class Table(
+    val name: String,
+  )
 
   @Target(AnnotationTarget.PROPERTY)
   @Retention(AnnotationRetention.RUNTIME)
-  annotation class Column(val name: String)
+  annotation class Column(
+    val name: String,
+  )
 
   fun generateTableStatement(clazz: KClass<*>): String? {
     val tableAnnotation: Table? = clazz.findAnnotation<Table>()
     val tableName = tableAnnotation?.name ?: return null
 
-    val columns = clazz.declaredMemberProperties.mapNotNull { prop ->
-      val columnAnnotation: Column? = prop.findAnnotation<Column>()
-      val columnName = columnAnnotation?.name
-      val columnType = when (prop.returnType.classifier) {
-        Int::class -> "INTEGER"
-        String::class -> "TEXT"
-        Boolean::class -> "BOOLEAN"
-        else -> null
-      }
+    val columns =
+      clazz.declaredMemberProperties.mapNotNull { prop ->
+        val columnAnnotation: Column? = prop.findAnnotation<Column>()
+        val columnName = columnAnnotation?.name
+        val columnType =
+          when (prop.returnType.classifier) {
+            Int::class -> "INTEGER"
+            String::class -> "TEXT"
+            Boolean::class -> "BOOLEAN"
+            else -> null
+          }
 
-      if (columnName == null || columnType == null) null
-      else "$columnName $columnType"
-    }
+        if (columnName == null || columnType == null) {
+          null
+        } else {
+          "$columnName $columnType"
+        }
+      }
 
     return "CREATE TABLE $tableName ${
       columns.joinToString(

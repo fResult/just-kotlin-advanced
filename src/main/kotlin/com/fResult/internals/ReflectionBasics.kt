@@ -11,7 +11,10 @@ import kotlin.reflect.jvm.jvmName
 
 object ReflectionBasics {
   // reflection = inspect and invoke functionality dynamically at runtime
-  data class Person(val name: String, val age: Int) {
+  data class Person(
+    val name: String,
+    val age: Int,
+  ) {
     var favoriteMovie: String? = "Forrest Gump"
     var phoneNumbers = emptyList<String>()
 
@@ -22,6 +25,7 @@ object ReflectionBasics {
 
     companion object {
       val CAN_FLY = false
+
       fun fromCsv(csv: String): Person? {
         val tokens = csv.split(",").map { it.trim() }
 
@@ -66,24 +70,26 @@ object ReflectionBasics {
     println("------------- Class properties -------------")
     classProperties.forEach { prop ->
       println(
-        "Name: ${prop.name}, Type: ${prop.returnType.classifier}, Is Nullable: ${prop.returnType.isMarkedNullable}"
+        "Name: ${prop.name}, Type: ${prop.returnType.classifier}, Is Nullable: ${prop.returnType.isMarkedNullable}",
       )
     }
 
     // refer to a particular properties (at RUNTIME) on an instance
     val korn = Person("Korn", 22)
     println("------------- Korn's properties -------------")
-    val kornProperties = classProperties.map { prop ->
-      "${prop.name} -> ${prop.call(korn)}" // korn.$prop
-    }
+    val kornProperties =
+      classProperties.map { prop ->
+        "${prop.name} -> ${prop.call(korn)}" // korn.$prop
+      }
     kornProperties.forEach(::println)
 
     // can mutate properties dynamically
     println("Before mutation: ${korn.favoriteMovie}")
     val favMovieProp = classProperties.find { it.name.lowercase().contains("movie") }
     favMovieProp?.let {
-      if (it is KMutableProperty<*>)
+      if (it is KMutableProperty<*>) {
         it.setter.call(korn, "Shawshank Redemption")
+      }
     }
     println("After mutation: ${korn.favoriteMovie}")
 
@@ -97,9 +103,12 @@ object ReflectionBasics {
       println(
         "Function $fnName: (${
           params.joinToString(", ") {
-            it.type.toString().split(".").last()
+            it.type
+              .toString()
+              .split(".")
+              .last()
           }
-        }) -> $returnType"
+        }) -> $returnType",
       )
     }
 
@@ -118,9 +127,10 @@ object ReflectionBasics {
 
       // can invoke functions with a map with all the args
       val params = it.parameters
-      val newPersonV2 = it.callBy(
-        mapOf(params[0] to "John", params[1] to 999)
-      )
+      val newPersonV2 =
+        it.callBy(
+          mapOf(params[0] to "John", params[1] to 999),
+        )
       println("New person instantiated via parameter map: $newPersonV2")
     }
 
@@ -137,9 +147,12 @@ object ReflectionBasics {
       println(
         "Function: ${fn.name}: (${
           params.joinToString(", ") {
-            it.type.toString().split(".").last()
+            it.type
+              .toString()
+              .split(".")
+              .last()
           }
-        }), Type: ${fn.returnType}"
+        }), Type: ${fn.returnType}",
       )
     }
   }

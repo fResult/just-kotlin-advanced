@@ -18,19 +18,27 @@ object ReifiedTypes {
   inline fun <reified T> List<Any>.filterByType(): List<T> =
     this.filter(T::class::isInstance).map(T::class.java::cast)
 
-  data class Person(val name: String, val age: Int)
-  data class Car(val make: String, val model: String)
+  data class Person(
+    val name: String,
+    val age: Int,
+  )
+
+  data class Car(
+    val make: String,
+    val model: String,
+  )
 
   fun demoReifiedType() {
-    val mixedList = listOf(
-      Person("John", 30),
-      Car("Toyota", "Corolla"),
-      Person("Jane", 25),
-      Car("Honda", "Accord"),
-      "A random string",
-      42,
-      "Another random string"
-    )
+    val mixedList =
+      listOf(
+        Person("John", 30),
+        Car("Toyota", "Corolla"),
+        Person("Jane", 25),
+        Car("Honda", "Accord"),
+        "A random string",
+        42,
+        "Another random string",
+      )
 
     // These will be legal since they can be performed at runtime
     val people = mixedList.filterByType<Person>()
