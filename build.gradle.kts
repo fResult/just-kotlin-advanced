@@ -16,6 +16,11 @@ repositories {
 val kotlinVersion = "2.2.21"
 dependencies {
   implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
+  implementation(project(":builder-lib-annotations"))
+  implementation(project(":builder-lib-impl"))
+
+  ksp(project(":builder-lib-impl"))
+
   testImplementation(kotlin("test"))
 }
 
