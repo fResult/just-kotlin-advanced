@@ -6,6 +6,7 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.validate
 
 class BuilderProcessor(
   private val generator: CodeGenerator,
@@ -26,7 +27,9 @@ class BuilderProcessor(
         .filterIsInstance<KSClassDeclaration>()
 
     classes.forEach { clazz ->
-      generateBuilderClass(clazz)
+      if (clazz.validate()) {
+        generateBuilderClass(clazz)
+      }
     }
 
     // only those symbols that CANNOT be processed at this time
@@ -53,7 +56,49 @@ class BuilderProcessor(
       writer.write("package $packageName\n\n")
       writer.write("class $builderClassName {\n")
 
-      writer.write("}")
+      properties.forEach { prop ->
+        val propName = prop.simpleName.asString()
+        val propType = prop.type.resolve()
+
+        // private var $prop: $type? = null
+        // fun prop($name: $type): Unit = $prop = $name
+        writer.write("  private var $propName: $propType? = null\n")
+        writer.write("  fun $propName(value: $propType) = apply { $propName = value }\n")
+      }
+
+      /*
+       * class PersonBuilder {
+       *   private var name: String? = null
+       *   private var age: Int? = null
+       *
+       *   fun name(value: String) = apply { name = value }
+       *   fun age(value: Int) = apply { age = value }
+       *
+       *   fun build() {
+       *      return Person(
+       *        name ?: throw new IllegalArgumentException("name must be provided"),
+       *        age ?: throw new IllegalArgumentException("age must be provided"),
+       *      )
+       *   }
+       * }
+       */
+      writer.write("  fun build(): $className {\n")
+      writer.write("    return $className(\n")
+      properties.forEachIndexed { index, prop ->
+        prop.simpleName.asString().also { propName ->
+          writer.write(
+            "      $propName = $propName ?: throw IllegalArgumentException(\"$propName must be provided!\")",
+          )
+          if (index < properties.size - 1) {
+            writer.write(",\n")
+          } else {
+            writer.write("\n")
+          }
+        }
+      }
+      writer.write("    )\n")
+      writer.write("  }\n")
+      writer.write("}\n")
     }
 
 //    println("className = $className")
