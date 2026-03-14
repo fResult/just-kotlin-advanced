@@ -48,7 +48,7 @@ class BuilderProcessor(
       generator.createNewFile(
         Dependencies(false, *originalFiles.toTypedArray()),
         packageName,
-        className,
+        builderClassName,
       )
 
     file.bufferedWriter().use { writer ->
