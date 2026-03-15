@@ -1,8 +1,10 @@
 @file:Suppress("ktlint:standard:no-consecutive-comments")
 
-package com.fResult.internals
+package com.fResult.internals.metaprogramming
 
 import com.fResult.com.fResult.builderKsp.Builder
+import com.fResult.internals.MoneyBuilder
+import com.fResult.internals.PersonBuilder
 
 // Use-case: generate builder patterns for data classes
 @Builder

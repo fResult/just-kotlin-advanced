@@ -1,4 +1,4 @@
-package com.fResult.internals
+package com.fResult.internals.metaprogramming
 
 import kotlin.reflect.KClass
 import kotlin.reflect.full.declaredMemberProperties

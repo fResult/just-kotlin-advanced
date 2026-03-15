@@ -1,6 +1,6 @@
 @file:Suppress("ktlint:standard:no-consecutive-comments")
 
-package com.fResult.internals
+package com.fResult.internals.metaprogramming
 
 import java.io.File
 import kotlin.reflect.KParameter
