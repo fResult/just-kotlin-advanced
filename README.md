@@ -19,3 +19,13 @@ Following the [Rock the JVM - Advanced Kotlin course](https://rockthejvm.com/cou
 
 - **Kotlin Contracts:** Applied compiler contracts to improve smart-casting and null-safety, making the code more predictable for the type checker
 - **Reified Type Parameters:** Utilized `inline` functions with `reified` types to overcome JVM type erasure, enabling clean generic operations at runtime
+
+## Architect's Perspective: Beyond the Code
+
+Mastering these advanced features isn't just about writing "clever" code.\
+It's about **reducing system entropy** and **enforcing correctness** at scale.
+
+1. **Framework-Level Thinking:** By using KSP and Reflection, we can build internal tools that automate repetitive tasks (like mapping or validation), ensuring team consistency without manual toil
+2. **Type-Driven Safety:** Advanced generics allow us to design APIs that make "impossible states unrepresentable."\
+    This is crucial for building resilient, mission-critical systems where logic errors lead to data loss
+3. **Performance Optimization:** Understanding `inline` and `contracts` enables us to write high-performance, functional code that minimizes Garbage Collection pressure
