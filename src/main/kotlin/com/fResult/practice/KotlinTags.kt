@@ -128,7 +128,11 @@ object KotlinTags {
   // TODO: add builders for the rest of the HTML tags: HtmlBuilder, HeadBuilder, and BodyBuilder
 
   // step 3
-  fun html(init: HtmlBuilder.() -> Unit) = HtmlBuilder().apply(init).build()
+  fun html(init: HtmlBuilder.() -> Unit): Html { // = HtmlBuilder().apply(init).build()
+    val builder = HtmlBuilder()
+    builder.init()
+    return builder.build()
+  }
 
   val htmlExample =
     html {
